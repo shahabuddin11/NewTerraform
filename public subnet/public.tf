@@ -1,5 +1,6 @@
 resource "aws_subnet" "public-1" {
   cidr_block = var.public_subnets_ids
+  vpc_id     = var.vpc_cidr
   map_public_ip_on_launch = "true" //it makes this a public subnet
   availability_zone = var.availability_zones
   tags = merge(
@@ -9,7 +10,7 @@ resource "aws_subnet" "public-1" {
   },
   var.additional_tags
   )
-  vpc_id = ""
+
 }
 resource "aws_internet_gateway" "dev-igw" {
   vpc_id = ""
@@ -22,7 +23,7 @@ resource "aws_internet_gateway" "dev-igw" {
   )
 }
 resource "aws_route_table" "dev-public-crt" {
-  vpc_id = ""
+  vpc_id  = var.vpc_cidr
 
   route {
     //associated subnet can reach everywhere
