@@ -15,21 +15,21 @@ variable "additional_tags" {
 }
 variable "availability_zones" {
   description = "A list of availability_zones  inside the Region"
-  type        = list(string)
-  default     = ["us-east-2a","us-east-2b"]
-}
-variable "private_subnets" {
-  description = "A list of private subnets inside the VPC"
-  type        = list(string)
-  default     = ["10.0.2.0/24"]
+  type        = string
+  default     = "us-east-2a"
 }
 
 variable "public_subnets_ids" {
   description = "A list of private subnets inside the VPC"
-  type        = list(string)
-  default     = ["10.0.1.0/28"]
+  type        = string
+  default     = "10.0.1.0/28"
 }
+
 variable "vpc_cidr" {
-  description = "Environment in tags to identidy"
-  default     = "10.0.0.0/16"
+  default = ""
+}
+variable "vpc_id" {
+  description = "VPC id for existing vpc to create subnets"
+  type        = string
+  default     = null
 }

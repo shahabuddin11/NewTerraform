@@ -1,12 +1,16 @@
 
 resource "aws_subnet" "private" {
-  vpc_id = ""
+  vpc_id  = var.vpc_id
   cidr_block = var.private_subnets
-  availability_zone = "eu-west-1a"
+  availability_zone = var.availability_zones
+  tags = merge(
+  {
+    "Name"        = format("%s-vpc-private-%s", var.name, var.environment)
+    "Environment" = format("%s", var.environment)
+  },
+  var.additional_tags
+  )
 
-  tags {
-    Name = "Private Subnet"
-  }
 }
 
 resource "aws_security_group" "nat" {
@@ -14,27 +18,9 @@ resource "aws_security_group" "nat" {
   description = "Allow traffic to pass from the private subnet to the internet"
 
   ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
-    cidr_blocks = var.private_subnets
-  }
-  ingress {
-    from_port = 443
-    to_port = 443
-    protocol = "tcp"
-    cidr_blocks = var.private_subnets
-  }
-  ingress {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port = -1
-    to_port = -1
-    protocol = "icmp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -50,18 +36,7 @@ resource "aws_security_group" "nat" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  egress {
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
-    cidr_blocks = var.private_subnets
-  }
-  egress {
-    from_port = -1
-    to_port = -1
-    protocol = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
 
   tags = merge(
   {
@@ -74,16 +49,22 @@ resource "aws_security_group" "nat" {
 }
 
 resource "aws_route_table" "private" {
-  vpc_id = ""
+  vpc_id            = var.vpc_id
+
 
   route {
     cidr_block = "0.0.0.0/0"
+    nat_gateway_id    = var.nat_gateway_ids
 
   }
 
-  tags {
-    Name = "Private Subnet"
-  }
+  tags = merge(
+  {
+    "Name"        = format("%s-vpc-%s", var.name, var.environment)
+    "Environment" = format("%s", var.environment)
+  },
+  var.additional_tags
+  )
 }
 
 resource "aws_route_table_association" "private" {

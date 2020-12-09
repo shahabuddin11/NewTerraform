@@ -1,6 +1,6 @@
 resource "aws_subnet" "public-1" {
+  vpc_id            = var.vpc_id
   cidr_block = var.public_subnets_ids
-  vpc_id     = var.vpc_cidr
   map_public_ip_on_launch = "true" //it makes this a public subnet
   availability_zone = var.availability_zones
   tags = merge(
@@ -12,8 +12,9 @@ resource "aws_subnet" "public-1" {
   )
 
 }
+
 resource "aws_internet_gateway" "dev-igw" {
-  vpc_id = ""
+  vpc_id = var.vpc_id
   tags = merge(
   {
     "Name"        = format("%s-vpc-%s", var.name, var.environment)
@@ -23,7 +24,7 @@ resource "aws_internet_gateway" "dev-igw" {
   )
 }
 resource "aws_route_table" "dev-public-crt" {
-  vpc_id  = var.vpc_cidr
+  vpc_id = var.vpc_id
 
   route {
     //associated subnet can reach everywhere
@@ -34,7 +35,7 @@ resource "aws_route_table" "dev-public-crt" {
 
   tags = merge(
   {
-    "Name"        = format("%s-vpc-%s", var.name, var.environment)
+    "Name"        = format("%s-public-vpc-%s", var.name, var.environment)
     "Environment" = format("%s", var.environment)
   },
   var.additional_tags
@@ -77,4 +78,14 @@ resource "aws_security_group" "ssh-allowed" {
   var.additional_tags
   )
 }
+resource "aws_eip" "nat_gw_eip" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "gw" {
+  allocation_id = aws_eip.nat_gw_eip.id
+  subnet_id     = aws_subnet.public-1.id
+}
+
+
 
